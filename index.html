@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            img{
+                width: 70%;
+                display: flex;
+            }
+            button{
+                position: fixed;
+                width: 10%;
+                height: 10%;
+            }
+            button.prev{
+                left: 85%;
+                bottom: 25%;
+            }
+            button.next{
+                left: 85%;
+                bottom: 10%;
+            }
+            button.quit{
+                left: 85%;
+                bottom: 40%;
+            }
+            .mlml{
+                background-color: cornflowerblue;
+                position: fixed;
+                left: 0;
+                right: 85%;
+                top: 0;
+                bottom: 0;
+                overflow:auto;
+                text-overflow: ellipsis;
+                -ms-overflow-style: none;
+            }
+            .cpt{
+                background-color:aqua;
+                margin: 2%;
+                border: 2px solid black;
+                border-radius: 4%;
+                box-shadow: 0 0 5px #888888;
+                user-select: none;
+            }
+            .actived{
+                background-color:lime;
+            }
+            /* ::-webkit-scrollbar{width: 0;} */
+            /* *{-ms-overflow-style: none;} */
+        </style>
+        <script src="./data.js"></script>
+        <script>
+            var n=-1;
+            function imgerrorfun(){
+                var img=event.srcElement;
+                img.src="data:image/jpg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCAACABQDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD4Fb9q/wCN3P8AxePx/wD+FRff/HafD+1d8bSHz8YvH54H/Mz33/x2iigBG/au+N3H/F4/H/T/AKGi+/8AjtFFFAH/2Q==";
+                img.onerror=null;
+            }
+            function load_img(next){
+                if(next){
+                    if(n<data.length)n++;
+                    if(n==data.length)n=0;
+                }
+                else{
+                    if(n>=0)n--;
+                    if(n<0)n=data.length-1;
+                }
+                if(document.getElementsByClassName("mlml").length==0){
+                    document.body.innerHTML+='<div id="main" style="height: 110vh;"></div>';
+                    var ml='<div class="mlml">';
+                    for(i=0;i<charpter.length;i++){
+                        if(i==n)ml+="<div class='cpt actived' id='_"+i+"' onclick='n="+(i-1)+";load_img(1);'>"+charpter[i]+"</div>";
+                        else ml+="<div class='cpt' id='_"+i+"' onclick='n="+(i-1)+";load_img(1);'>"+charpter[i]+"</div>";
+                    }
+                    ml+="</div>";
+                    document.body.innerHTML+=ml;
+                    document.body.innerHTML+='<button class="prev" onclick="load_img(0);">prev</button>';
+                    document.body.innerHTML+='<button class="next" onclick="load_img(1);">next</button>';
+                    //if(document.location.href.indexOf("file:///")==-1)document.body.innerHTML+='<button class="quit" onclick="document.location=\'./../../\';">quit</button>';
+                }
+                else{
+                    document.querySelectorAll(".cpt").forEach(function(elem){
+                        if(elem.classList.contains("actived")){
+                            elem.classList.remove("actived");
+                        }
+                        if(elem.id=="_"+n){
+                            elem.classList.add("actived");
+                        }
+                    })
+                }
+                document.getElementById("main").innerHTML='';
+                document.title=charpter[n];
+                for(i=0;i<data[n];i++){
+                    document.getElementById("main").innerHTML+="<center><img src='"+charpter[n]+"/"+i+".png"+"' onerror='imgerrorfun()'></center>";
+                }
+                // location.hash="#_"+n;
+                document.body.scrollIntoView();
+                document.getElementsByClassName("mlml")[0].scrollTop=document.getElementById("_"+n).offsetTop;
+            }
+        </script>
+    </head>
+    <body style="background-color: black;">
+        <script>load_img(1)</script>
+    </body>
+</html>
