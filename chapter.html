@@ -27,7 +27,7 @@
             <!-- Images injected here -->
         </div>
 
-        <div class="reader-nav">
+        <div class="reader-nav bottom">
              <div class="nav-center">
                 <a href="index.html" class="nav-btn">目录</a>
             </div>
@@ -108,42 +108,109 @@
              updateNav(prevChapter, nextChapter);
 
 
-            // Auto-hide UI Logic
-            let lastScrollTop = 0;
-            const navs = document.querySelectorAll('.reader-nav');
+            // Placeholder Logic
+            // We need placeholders to prevent layout jump when switching to fixed mode
+            // or just to keep the original space occupied if we want "clone" behavior.
+            // But with the "Move" logic:
+            // 1. Initially Static. Limit: Navs are part of flow.
+            // 2. Switch to Fixed: Nav leaves flow. Original space collapses.
+            //    -> We must show a placeholder of same height.
+            // 3. Switch to Static: Nav back to flow.
+            //    -> Hide placeholder.
             
-            function toggleNav(show) {
-                navs.forEach(nav => {
-                    if (show) {
-                        nav.classList.remove('hidden-nav');
+            const navs = document.querySelectorAll('.reader-nav');
+            const placeholders = [];
+
+            navs.forEach(nav => {
+                const p = document.createElement('div');
+                p.className = 'nav-placeholder';
+                // Set height? We will set it dynamically on switch or just rely on content
+                // Better to set explicit height when active
+                p.style.display = 'none'; 
+                nav.parentNode.insertBefore(p, nav); // Insert before (or after, doesn't matter for top/bottom logic much if flow matches)
+                // For top nav: placeholder should be where nav was.
+                // For bottom nav: same.
+                // Since we use insertBefore, p is above nav.
+                // For Top Nav: P then Nav. If Nav fixed -> P stays, Nav jumps out. Correct.
+                // For Bottom Nav: P then Nav. If Nav fixed -> P stays. Correct.
+                placeholders.push({ nav, placeholder: p });
+            });
+
+
+            // Toggle Logic
+            function toggleNav(showFixed) {
+                placeholders.forEach(({ nav, placeholder }) => {
+                    if (showFixed) {
+                        // Capture height and position before switching if needed
+                        if (!nav.classList.contains('fixed-mode')) {
+                             const rect = nav.getBoundingClientRect();
+                             placeholder.style.height = rect.height + 'px';
+                             placeholder.style.display = 'block';
+                             
+                             nav.classList.add('fixed-mode');
+
+                             // Intelligent Animation Logic:
+                             // Calculate exact visual delta to animate from "current scroll position" to "fixed position".
+                             const height = rect.height;
+                             let startY = 0;
+
+                             if (nav.classList.contains('top')) {
+                                 // Top Nav: Target is 0. Current is rect.top.
+                                 // If scrolled down, rect.top is negative.
+                                 // Limit startY to -height (full slide-in) to avoid flying from infinity.
+                                 startY = Math.max(rect.top, -height);
+                             } else {
+                                 // Bottom Nav: Target is (windowHeight - height). Current is rect.top.
+                                 const targetTop = window.innerHeight - height;
+                                 const diff = rect.top - targetTop;
+                                 // Limit startY to height (full slide-up)
+                                 startY = Math.min(diff, height);
+                             }
+                             
+                             // Only animate if there is a noticeable jump (> 1px)
+                             if (Math.abs(startY) > 1) {
+                                 nav.style.setProperty('--translate-start', `${startY}px`);
+                                 nav.classList.add('animate-dynamic');
+                             }
+                        }
                     } else {
-                        nav.classList.add('hidden-nav');
+                        // Revert to static
+                         if (nav.classList.contains('fixed-mode')) {
+                             nav.classList.remove('fixed-mode');
+                             nav.classList.remove('animate-dynamic'); 
+                             nav.style.removeProperty('--translate-start');
+                             placeholder.style.display = 'none';
+                         }
                     }
                 });
             }
 
             // Click to toggle
             document.addEventListener('click', (e) => {
-                // Ignore clicks on buttons or links
-                if (e.target.closest('a') || e.target.closest('button')) return;
+                // Ignore clicks on buttons, links, or the nav bar itself
+                if (e.target.closest('a') || e.target.closest('button') || e.target.closest('.reader-nav')) return;
                 
-                const isHidden = navs[0].classList.contains('hidden-nav');
-                toggleNav(isHidden); // If hidden, show it, vice versa
+                // Check current state
+                const isFixed = navs[0].classList.contains('fixed-mode');
+                toggleNav(!isFixed); 
             });
 
-            // Scroll Logic (Hide on any scroll, Show at bottom)
+            // Scroll Logic (Revert to Static on scroll)
             window.addEventListener('scroll', () => {
-                let st = window.pageYOffset || document.documentElement.scrollTop;
+                // If we are scrolling, and UI is fixed (floating), revert it to static (hide it from view, put back to flow)
+                // Exception: if we are at bottom, static UI is visible naturally.
+                // Exception: if we are at top, static UI is visible naturally.
                 
-                // Check if at bottom (allow small buffer)
-                if ((window.innerHeight + Math.ceil(st)) >= document.body.offsetHeight - 20) {
-                     toggleNav(true);
-                } 
-                else if (st > 50) { 
-                    // Hide UI on any scroll (up or down) if not at top
-                    toggleNav(false);
-                }                
-                lastScrollTop = st <= 0 ? 0 : st; // For Mobile or negative scrolling
+                // We just want to ensure "floating" mode is dismissed on scroll.
+                // But we don't want to dismiss it INSTANTLY if the user just tapped. 
+                // However, standard interaction is: scroll = reading = hide controls.
+                
+                // Small buffer to prevent accidental triggers (e.g. touch jitter)
+                // But here, switching to static means it jumps out of view if not at ends.
+                
+                 if (navs[0].classList.contains('fixed-mode')) {
+                     toggleNav(false);
+                 }
             }, {passive: true});
         });
 

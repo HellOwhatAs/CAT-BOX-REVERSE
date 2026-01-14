@@ -92,7 +92,7 @@ h1 {
 .reader-container {
     max-width: 1000px; /* Wider for identifying spread pages if needed, but usually vertical scroll */
     margin: 0 auto;
-    padding: 60px 0; /* Add padding for fixed headers */
+    /* padding removed: UI is now part of the flow */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -113,35 +113,54 @@ h1 {
     align-items: center; /* Vertically center items */
     padding: 15px 20px;
     background-color: var(--card-bg);
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: 0 auto; /* Center horizontal in desktop */
-    max-width: 1000px; /* Match width with reader-container */
     width: 100%;
     z-index: 100;
     box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
-    transition: transform 0.3s ease-in-out;
+    /* Default: Static (part of flow) */
+    position: static; 
 }
 
 .reader-nav.top {
-    position: fixed;
-    top: 0;
-    bottom: auto;
-    margin-bottom: 0;
+    /* Top nav specific styles */
     box-shadow: 0 2px 10px rgba(0,0,0,0.5);
     border-bottom: none;
 }
 
-.reader-nav.hidden-nav {
-    transform: translateY(100%);
+/* Fixed Mode (Overlay) */
+.reader-nav.fixed-mode {
+    position: fixed;
+    left: 0; 
+    right: 0;
+    margin: 0 auto;
+    max-width: 1000px;
+    /* No default animation - we apply it conditionally */
 }
 
-.reader-nav.top.hidden-nav {
-    transform: translateY(-100%);
+.reader-nav.top.fixed-mode {
+    top: 0;
 }
 
+.reader-nav.bottom.fixed-mode {
+    bottom: 0;
+}
+
+/* Dynamic Slide Animation */
+.reader-nav.fixed-mode.animate-dynamic {
+    animation: slide-dynamic 0.05s ease-out;
+}
+
+@keyframes slide-dynamic {
+    from { transform: translateY(var(--translate-start)); }
+    to { transform: translateY(0); }
+}
+
+/* Placeholder class (will be applied to divs created by JS) */
+.nav-placeholder {
+    width: 100%;
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+/* Previous hidden classes are no longer needed for logic, but we keep button styles */
 .nav-btn {
     display: inline-block; /* Ensure proper box model rendering */
     padding: 8px 15px; /* Slightly smaller padding */
@@ -150,9 +169,23 @@ h1 {
     color: #121212;
     border-radius: 4px;
     font-weight: bold;
-    text-decoration: none;
+    text-decoration: none; /* No underline */
     line-height: 1.5; /* Normalize line height */
     vertical-align: middle; /* Align with text */
+    user-select: none; /* Prevent text selection */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    -webkit-tap-highlight-color: transparent; /* Remove blue highlight on touch */
+}
+
+.nav-btn:hover, .nav-btn:active, .nav-btn:focus {
+    text-decoration: none;
+    color: #121212;
+    outline: none;
 }
 .nav-btn.disabled {
     opacity: 0.5;
