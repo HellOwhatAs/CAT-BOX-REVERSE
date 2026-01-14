@@ -123,10 +123,14 @@
                 toggleNav(isHidden); // If hidden, show it, vice versa
             });
 
-            // Scroll Logic (Hide on scroll down, Show on scroll up)
+            // Scroll Logic (Hide on scroll down, Show on scroll up, Show at bottom)
             window.addEventListener('scroll', () => {
                 let st = window.pageYOffset || document.documentElement.scrollTop;
-                if (st > lastScrollTop && st > 100) {
+                
+                // Check if at bottom (allow small buffer)
+                if ((window.innerHeight + Math.ceil(st)) >= document.body.offsetHeight - 20) {
+                     toggleNav(true);
+                } else if (st > lastScrollTop && st > 100) {
                     // Scroll Down
                      toggleNav(false);
                 } else if(st < lastScrollTop) {
