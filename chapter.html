@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阅读漫画</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="data.js"></script>
+</head>
+<body>
+
+    <div class="reader-container">
+        
+        <div class="reader-nav top" style="justify-content: center;">
+            <span id="chapter-title-display" style="font-weight: bold;"></span>
+        </div>
+
+        <div id="comic-pages">
+            <!-- Images injected here -->
+        </div>
+
+        <div class="reader-nav">
+             <div class="nav-center">
+                <a href="index.html" class="nav-btn">目录</a>
+            </div>
+            <div>
+                <a id="prev-btn-bottom" href="#" class="nav-btn">上一话</a>
+                <a id="next-btn-bottom" href="#" class="nav-btn" style="margin-left: 10px;">下一话</a>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof comicData === 'undefined') {
+                alert("Could not load data.js");
+                return;
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const chapterId = parseInt(urlParams.get('id'));
+
+            if (!chapterId) {
+                alert("未指定章节");
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const chapter = comicData.chapters.find(c => c.index === chapterId);
+
+            if (!chapter) {
+                document.getElementById('comic-pages').innerHTML = "<p style='padding:20px; text-align:center;'>章节未找到或未下载。</p>";
+                updateNav(null, null);
+                return;
+            }
+
+            document.title = `${chapter.title} - ${comicData.title}`;
+            document.getElementById('chapter-title-display').textContent = `第 ${chapter.index} 话: ${chapter.title}`;
+
+            // Render Images or Show error if empty
+            const container = document.getElementById('comic-pages');
+            
+            if (!chapter.images || chapter.images.length === 0) {
+                container.innerHTML = "<p style='padding:50px; text-align:center;'>本章节暂无图片。</p>";
+            } else {
+                // Use invalid characters replacement if needed, but modern browsers handle paths well.
+                // We use encodeURIComponent for path parts to be safe.
+                
+                chapter.images.forEach(imgName => {
+                    const img = document.createElement('img');
+                    // We need to handle the path carefully. 
+                    // folderName + / + imgName. 
+                    // encodeURIComponent encodes / as well which breaks path, so encode parts.
+                    const src = encodeURIComponent(chapter.folderName) + '/' + encodeURIComponent(imgName);
+                    
+                    img.src = src;
+                    img.className = 'comic-page';
+                    img.loading = 'lazy'; // Native lazy loading
+                    img.alt = imgName;
+                    container.appendChild(img);
+                });
+            }
+
+            // Navigation Logic
+            // Find current index in the array to get next/prev
+             const currentIndex = comicData.chapters.findIndex(c => c.index === chapterId);
+             
+             let prevChapter = null;
+             let nextChapter = null;
+
+             if (currentIndex > 0) {
+                prevChapter = comicData.chapters[currentIndex - 1];
+             }
+             
+             if (currentIndex < comicData.chapters.length - 1) {
+                nextChapter = comicData.chapters[currentIndex + 1];
+             }
+
+             updateNav(prevChapter, nextChapter);
+
+
+            // Auto-hide UI Logic
+            let lastScrollTop = 0;
+            const navs = document.querySelectorAll('.reader-nav');
+            
+            function toggleNav(show) {
+                navs.forEach(nav => {
+                    if (show) {
+                        nav.classList.remove('hidden-nav');
+                    } else {
+                        nav.classList.add('hidden-nav');
+                    }
+                });
+            }
+
+            // Click to toggle
+            document.addEventListener('click', (e) => {
+                // Ignore clicks on buttons or links
+                if (e.target.closest('a') || e.target.closest('button')) return;
+                
+                const isHidden = navs[0].classList.contains('hidden-nav');
+                toggleNav(isHidden); // If hidden, show it, vice versa
+            });
+
+            // Scroll Logic (Hide on scroll down, Show on scroll up)
+            window.addEventListener('scroll', () => {
+                let st = window.pageYOffset || document.documentElement.scrollTop;
+                if (st > lastScrollTop && st > 100) {
+                    // Scroll Down
+                     toggleNav(false);
+                } else if(st < lastScrollTop) {
+                    // Scroll Up
+                    toggleNav(true);
+                }
+                lastScrollTop = st <= 0 ? 0 : st; // For Mobile or negative scrolling
+            }, {passive: true});
+        });
+
+        function updateNav(prev, next) {
+            const setBtn = (id, chap) => {
+                const el = document.getElementById(id);
+                if (chap) {
+                    el.href = `chapter.html?id=${chap.index}`;
+                    el.classList.remove('disabled');
+                } else {
+                    el.href = '#';
+                    el.classList.add('disabled');
+                }
+            };
+
+            setBtn('prev-btn-bottom', prev);
+            setBtn('next-btn-bottom', next);
+        }
+    </script>
+</body>
+</html>

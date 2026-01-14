@@ -1,0 +1,191 @@
+:root {
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --text-color: #e0e0e0;
+    --accent-color: #bb86fc;
+    --secondary-text: #a0a0a0;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header */
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #333;
+}
+
+h1 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.meta {
+    color: var(--secondary-text);
+    font-size: 0.9rem;
+}
+
+/* Chapter List */
+.chapter-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.chapter-item {
+    background-color: var(--card-bg);
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    transition: transform 0.2s, background-color 0.2s;
+    cursor: pointer;
+    display: block;
+    color: var(--text-color);
+}
+
+.chapter-item:hover {
+    transform: translateY(-2px);
+    background-color: #2c2c2c;
+    text-decoration: none;
+}
+
+.chapter-number {
+    font-size: 1.2rem;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.chapter-title {
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+}
+
+/* Reader View */
+.reader-container {
+    max-width: 1000px; /* Wider for identifying spread pages if needed, but usually vertical scroll */
+    margin: 0 auto;
+    padding: 60px 0; /* Add padding for fixed headers */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    min-height: 100vh;
+}
+
+.comic-page {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+.reader-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Vertically center items */
+    padding: 15px 20px;
+    background-color: var(--card-bg);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+    transition: transform 0.3s ease-in-out;
+}
+
+.reader-nav.top {
+    position: fixed;
+    top: 0;
+    bottom: auto;
+    margin-bottom: 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    border-bottom: none;
+}
+
+.reader-nav.hidden-nav {
+    transform: translateY(100%);
+}
+
+.reader-nav.top.hidden-nav {
+    transform: translateY(-100%);
+}
+
+.nav-btn {
+    display: inline-block; /* Ensure proper box model rendering */
+    padding: 8px 15px; /* Slightly smaller padding */
+    background-color: var(--accent-color);
+    white-space: nowrap; /* Prevent text wrapping */
+    color: #121212;
+    border-radius: 4px;
+    font-weight: bold;
+    text-decoration: none;
+    line-height: 1.5; /* Normalize line height */
+    vertical-align: middle; /* Align with text */
+}
+.nav-btn.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    background-color: #555;
+    color: #888;
+}
+
+.nav-center {
+    display: flex;
+    align-items: center;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .chapter-list {
+        grid-template-columns: 1fr; /* List view on mobile */
+    }
+    
+    .chapter-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: left;
+    }
+    
+    .chapter-number {
+        margin-bottom: 0;
+        margin-right: 10px;
+    }
+
+    .comic-page {
+        width: 100%; /* Full width on mobile */
+    }
+}

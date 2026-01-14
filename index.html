@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>漫画阅读器</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="data.js"></script> <!-- Defines const comicData -->
+</head>
+<body>
+
+    <div class="container">
+        <header id="header">
+            <h1 id="comic-title">加载中...</h1>
+            <p id="comic-author" class="meta"></p>
+            <p id="comic-desc" style="margin-top: 10px; font-size: 0.95rem;"></p>
+        </header>
+
+        <div id="chapter-list" class="chapter-list">
+            <!-- Chapters will be injected here -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof comicData === 'undefined') {
+                alert("Could not load data.js. Please run generate_data.py first.");
+                return;
+            }
+
+            document.title = comicData.title + " - 漫画目录";
+            document.getElementById('comic-title').textContent = comicData.title;
+            document.getElementById('comic-author').textContent = comicData.authors || comicData.author;
+            document.getElementById('comic-desc').textContent = comicData.description;
+
+            const listContainer = document.getElementById('chapter-list');
+            
+            // Sort chapters by index just in case, though they should be sorted
+            const chapters = comicData.chapters || [];
+            
+            chapters.forEach(chapter => {
+                // if (!chapter.folderName) return; // Skip missing chapters
+
+                const a = document.createElement('a');
+                a.className = 'chapter-item';
+                a.href = `chapter.html?id=${chapter.index}`;
+                
+                // Display logic
+                const numSpan = document.createElement('span');
+                numSpan.className = 'chapter-number';
+                numSpan.textContent = `第 ${chapter.index} 话`; // Or maybe use just index
+                
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'chapter-title';
+                titleSpan.textContent = chapter.title;
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.appendChild(numSpan);
+                contentDiv.appendChild(titleSpan);
+                
+                a.appendChild(contentDiv);
+                
+                listContainer.appendChild(a);
+            });
+        });
+    </script>
+</body>
+</html>
