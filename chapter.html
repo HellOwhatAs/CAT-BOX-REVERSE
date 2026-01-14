@@ -5,7 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>阅读漫画</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
     <script src="data.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js');
+            });
+        }
+    </script>
 </head>
 <body>
 
@@ -123,7 +131,7 @@
                 toggleNav(isHidden); // If hidden, show it, vice versa
             });
 
-            // Scroll Logic (Hide on scroll down, Show at bottom)
+            // Scroll Logic (Hide on any scroll, Show at bottom)
             window.addEventListener('scroll', () => {
                 let st = window.pageYOffset || document.documentElement.scrollTop;
                 
@@ -131,11 +139,9 @@
                 if ((window.innerHeight + Math.ceil(st)) >= document.body.offsetHeight - 20) {
                      toggleNav(true);
                 } 
-                else if (st > lastScrollTop) {
-                    // Scroll Down
-                     if (st > 100) { 
-                         toggleNav(false);
-                     }
+                else if (st > 50) { 
+                    // Hide UI on any scroll (up or down) if not at top
+                    toggleNav(false);
                 }                
                 lastScrollTop = st <= 0 ? 0 : st; // For Mobile or negative scrolling
             }, {passive: true});
