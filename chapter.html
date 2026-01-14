@@ -123,33 +123,20 @@
                 toggleNav(isHidden); // If hidden, show it, vice versa
             });
 
-            // Scroll Logic (Hide on scroll down, Show on scroll up with threshold, Show at bottom)
-            let scrollUpBuffer = 0;
-            const scrollThreshold = 50; // Pixels to scroll up before showing UI
-
+            // Scroll Logic (Hide on scroll down, Show at bottom)
             window.addEventListener('scroll', () => {
                 let st = window.pageYOffset || document.documentElement.scrollTop;
                 
                 // Check if at bottom (allow small buffer)
                 if ((window.innerHeight + Math.ceil(st)) >= document.body.offsetHeight - 20) {
                      toggleNav(true);
-                     scrollUpBuffer = 0; // Reset buffer
                 } 
                 else if (st > lastScrollTop) {
                     // Scroll Down
                      if (st > 100) { 
                          toggleNav(false);
                      }
-                     scrollUpBuffer = 0; // Reset buffer on scroll down
-                } 
-                else if (st < lastScrollTop) {
-                    // Scroll Up
-                    scrollUpBuffer += (lastScrollTop - st);
-                    if (scrollUpBuffer > scrollThreshold) {
-                        toggleNav(true);
-                        // Don't reset buffer here, we want it to stay shown as we keep scrolling up
-                    }
-                }
+                }                
                 lastScrollTop = st <= 0 ? 0 : st; // For Mobile or negative scrolling
             }, {passive: true});
         });
